@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShortURL Professional</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand bg-white mb-5">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="#">🔗 MyShort</a>
+            
+            <div class="ms-auto d-flex align-items-center">
+                <div id="login-area">
+                    <button onclick="login()" class="btn btn-primary btn-sm rounded-pill px-4">Login</button>
+                </div>
+                <div id="user-nav" class="d-none d-flex align-items-center gap-2">
+                    <span id="admin-badge" class="badge bg-warning text-dark d-none">Admin</span>
+                    <span id="user-name" class="small fw-bold">User</span>
+                    <img id="user-pic" src="" class="avatar">
+                    <button onclick="logout()" class="btn btn-light btn-sm text-danger ms-2">Log out</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                
+                <div class="card main-card p-4 mb-4 fade-in">
+                    <h4 class="text-center mb-4">Buat Link Pendek</h4>
+                    <div class="mb-3">
+                        <input type="url" id="input-url" class="form-control form-control-lg bg-light" placeholder="Tempel URL Panjang...">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text bg-white text-muted">/</span>
+                        <input type="text" id="input-slug" class="form-control" placeholder="Custom nama (opsional)">
+                    </div>
+                    <button id="btn-shorten" onclick="createShortLink()" class="btn btn-primary w-100 py-2 fw-bold">✨ Pendekkan</button>
+
+                    <div id="result-card" class="mt-4 p-3 bg-light rounded border d-none">
+                        <div class="input-group">
+                            <input type="text" id="result-link" class="form-control bg-white" readonly>
+                            <button class="btn btn-outline-primary" onclick="copyLink()">Salin</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dashboard-area" class="card main-card p-4 d-none fade-in">
+                    <h5 class="mb-3">Riwayat Link</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr><th>Short</th><th>Original</th><th>Views</th><th>Aksi</th></tr>
+                            </thead>
+                            <tbody id="table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/app.js"></script>
+
+</body>
+</html>

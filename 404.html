@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body style="font-family: sans-serif; text-align: center; padding-top: 50px; background: #f8f9fa;">
+    
+    <h3>🔍 Sedang mencari alamat...</h3>
+
+    <script>
+        // --- CONFIG FIREBASE (Samakan dengan config.js) ---
+        const firebaseConfig = {
+            apiKey: "PASTE_API_KEY_ANDA_DISINI",
+            authDomain: "PROJECT_ID.firebaseapp.com",
+            projectId: "PROJECT_ID",
+            storageBucket: "PROJECT_ID.appspot.com",
+            messagingSenderId: "SENDER_ID",
+            appId: "APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // --- REDIRECT LOGIC ---
+        async function run() {
+            // Ambil slug terakhir dari URL
+            const path = window.location.pathname.split('/').filter(x => x).pop();
+
+            if (path && path !== "404.html") {
+                try {
+                    const doc = await db.collection("links").doc(path).get();
+                    if (doc.exists) {
+                        // Update views tanpa menunggu (fire & forget)
+                        db.collection("links").doc(path).update({
+                            views: firebase.firestore.FieldValue.increment(1)
+                        });
+                        // Redirect
+                        window.location.replace(doc.data().original);
+                    } else {
+                        document.body.innerHTML = "<h1>404</h1><p>Link tidak ditemukan.</p><a href='/'>Ke Beranda</a>";
+                    }
+                } catch (e) {
+                    document.body.innerHTML = "Error: " + e.message;
+                }
+            } else {
+                // Jika akses file 404.html langsung, lempar ke home
+                window.location.href = "/"; // Ganti "/" dengan nama repo jika perlu (misal "/my-shortener/")
+            }
+        }
+        run();
+    </script>
+</body>
+</html>
