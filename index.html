@@ -3,75 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShortURL Professional</title>
+    <title>ShortURL Admin Login</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        body { background-color: #eef2f5; font-family: sans-serif; }
+        .hidden { display: none !important; }
+        .card { border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-radius: 12px; }
+        .login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+        }
+    </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand bg-white mb-5">
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm fixed-top">
         <div class="container">
-            <a class="navbar-brand fw-bold text-primary" href="#">🔗 MyShort</a>
-            
-            <div class="ms-auto d-flex align-items-center">
-                <div id="login-area">
-                    <button onclick="login()" class="btn btn-primary btn-sm rounded-pill px-4">Login</button>
-                </div>
-                <div id="user-nav" class="d-none d-flex align-items-center gap-2">
-                    <span id="admin-badge" class="badge bg-warning text-dark d-none">Admin</span>
-                    <span id="user-name" class="small fw-bold">User</span>
-                    <img id="user-pic" src="" class="avatar">
-                    <button onclick="logout()" class="btn btn-light btn-sm text-danger ms-2">Log out</button>
+            <a class="navbar-brand fw-bold text-primary" href="#">⚡ SuperLink</a>
+            <div class="ms-auto">
+                <button id="btnShowLogin" class="btn btn-outline-dark btn-sm" onclick="showLoginModal()">
+                    🔐 Login Admin
+                </button>
+                <div id="adminPanelBtn" class="hidden">
+                    <span class="badge bg-success me-2">Mode Admin</span>
+                    <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
                 </div>
             </div>
         </div>
     </nav>
+    <div style="height: 80px;"></div>
 
     <div class="container">
+        
         <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                
-                <div class="card main-card p-4 mb-4 fade-in">
-                    <h4 class="text-center mb-4">Buat Link Pendek</h4>
-                    <div class="mb-3">
-                        <input type="url" id="input-url" class="form-control form-control-lg bg-light" placeholder="Tempel URL Panjang...">
-                    </div>
+            <div class="col-md-6">
+                <div class="card p-4 mb-4">
+                    <h4 class="text-center mb-3">Buat Link Baru</h4>
+                    <input type="url" id="inpUrl" class="form-control mb-2" placeholder="Masukkan Link Panjang...">
                     <div class="input-group mb-3">
-                        <span class="input-group-text bg-white text-muted">/</span>
-                        <input type="text" id="input-slug" class="form-control" placeholder="Custom nama (opsional)">
+                        <span class="input-group-text bg-light">/</span>
+                        <input type="text" id="inpSlug" class="form-control" placeholder="Nama Custom (opsional)">
                     </div>
-                    <button id="btn-shorten" onclick="createShortLink()" class="btn btn-primary w-100 py-2 fw-bold">✨ Pendekkan</button>
+                    <button onclick="saveLink()" class="btn btn-primary w-100 fw-bold">PENDEKKAN</button>
 
-                    <div id="result-card" class="mt-4 p-3 bg-light rounded border d-none">
-                        <div class="input-group">
-                            <input type="text" id="result-link" class="form-control bg-white" readonly>
-                            <button class="btn btn-outline-primary" onclick="copyLink()">Salin</button>
+                    <div id="resultBox" class="mt-3 hidden">
+                        <div class="alert alert-success p-2 text-center">
+                            <input type="text" id="finalLink" class="form-control text-center fw-bold bg-white" readonly>
+                            <button onclick="copyLink()" class="btn btn-sm btn-success mt-2">Salin Link</button>
                         </div>
                     </div>
                 </div>
-
-                <div id="dashboard-area" class="card main-card p-4 d-none fade-in">
-                    <h5 class="mb-3">Riwayat Link</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr><th>Short</th><th>Original</th><th>Views</th><th>Aksi</th></tr>
-                            </thead>
-                            <tbody id="table-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-
             </div>
+        </div>
+
+        <div id="dashboardSection" class="hidden">
+            <div class="card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>📂 Kelola Semua Link</h5>
+                    <button onclick="loadLinks()" class="btn btn-sm btn-light">🔄 Refresh</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr class="table-light">
+                                <th>Short Link</th>
+                                <th>Link Asli</th>
+                                <th>Views</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableData">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loginModal" class="login-overlay hidden">
+        <div class="card p-4" style="width: 300px;">
+            <h5 class="text-center mb-3">Login Admin</h5>
+            <input type="text" id="uUser" class="form-control mb-2" placeholder="Username">
+            <input type="password" id="uPass" class="form-control mb-3" placeholder="Password">
+            <button onclick="doLogin()" class="btn btn-dark w-100">Masuk</button>
+            <button onclick="hideLoginModal()" class="btn btn-link w-100 text-muted mt-1 btn-sm">Batal</button>
         </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
-    <script src="assets/js/config.js"></script>
-    <script src="assets/js/app.js"></script>
+    <script>
+        // ============================================
+        // 1. CONFIGURASI (EDIT BAGIAN INI)
+        // ============================================
+        
+        // A. FIREBASE API (Isi punya Anda)
+        const firebaseConfig = {
+            apiKey: "PASTE_API_KEY_ANDA_DISINI",
+            authDomain: "PROJECT_ID.firebaseapp.com",
+            projectId: "PROJECT_ID",
+            storageBucket: "PROJECT_ID.appspot.com",
+            messagingSenderId: "SENDER_ID",
+            appId: "APP_ID"
+        };
 
+        // B. USERNAME & PASSWORD ADMIN (Ganti sesuka hati)
+        const ADMIN_USERNAME = "admin";
+        const ADMIN_PASSWORD = "123";
+
+        // ============================================
+        // 2. LOGIC SYSTEM
+        // ============================================
+
+        // Init Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // --- AUTH SYSTEM (MANUAL) ---
+        function checkLoginSession() {
+            const isLogin = localStorage.getItem("isLoggedIn");
+            if (isLogin === "true") {
+                document.getElementById('btnShowLogin').classList.add('hidden');
+                document.getElementById('adminPanelBtn').classList.remove('hidden');
+                document.getElementById('dashboardSection').classList.remove('hidden');
+                loadLinks(); // Load data otomatis jika login
+            } else {
+                document.getElementById('btnShowLogin').classList.remove('hidden');
+                document.getElementById('adminPanelBtn').classList.add('hidden');
+                document.getElementById('dashboardSection').classList.add('hidden');
+            }
+        }
+
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function hideLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+
+        function doLogin() {
+            const u = document.getElementById('uUser').value;
+            const p = document.getElementById('uPass').value;
+
+            if (u === ADMIN_USERNAME && p === ADMIN_PASSWORD) {
+                alert("Login Sukses!");
+                localStorage.setItem("isLoggedIn", "true"); // Simpan sesi di browser
+                hideLoginModal();
+                checkLoginSession();
+            } else {
+                alert("Username atau Password salah!");
+            }
+        }
+
+        function logout() {
+            if(confirm("Keluar dari admin?")) {
+                localStorage.removeItem("isLoggedIn");
+                location.reload();
+            }
+        }
+
+        // --- FITUR SHORTENER ---
+        async function saveLink() {
+            const url = document.getElementById('inpUrl').value.trim();
+            let slug = document.getElementById('inpSlug').value.trim();
+
+            if (!url) return alert("Link asli wajib diisi!");
+            if (!url.startsWith("http")) return alert("Gunakan http:// atau https://");
+
+            // Generate slug random 5 huruf jika kosong
+            if (!slug) slug = Math.random().toString(36).substring(2, 7);
+            
+            try {
+                // Cek duplikat
+                const docRef = db.collection("links").doc(slug);
+                const cek = await docRef.get();
+                if (cek.exists) return alert("Nama link '" + slug + "' sudah ada. Ganti yang lain.");
+
+                // Simpan Data
+                await docRef.set({
+                    original: url,
+                    views: 0,
+                    createdAt: new Date().toISOString()
+                });
+
+                // Tampilkan Hasil
+                const fullLink = window.location.href.split('?')[0].replace('index.html', '') + slug;
+                document.getElementById('finalLink').value = fullLink;
+                document.getElementById('resultBox').classList.remove('hidden');
+
+                // Jika admin sedang login, refresh tabel
+                if (localStorage.getItem("isLoggedIn") === "true") loadLinks();
+
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+        }
+
+        // --- DASHBOARD ADMIN ---
+        async function loadLinks() {
+            const tbody = document.getElementById('tableData');
+            tbody.innerHTML = "<tr><td colspan='4'>Memuat data...</td></tr>";
+
+            try {
+                // Ambil semua data (tanpa filter user karena ini simple mode)
+                const snapshot = await db.collection("links").get();
+                
+                tbody.innerHTML = "";
+                if (snapshot.empty) {
+                    tbody.innerHTML = "<tr><td colspan='4'>Belum ada link.</td></tr>";
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    const link = window.location.href.replace('index.html', '') + doc.id;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><a href="${link}" target="_blank" class="fw-bold text-decoration-none">${doc.id}</a></td>
+                            <td class="text-truncate" style="max-width: 150px;">${d.original}</td>
+                            <td>${d.views || 0}</td>
+                            <td>
+                                <button onclick="deleteLink('${doc.id}')" class="btn btn-sm btn-danger">&times; Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = "<tr><td colspan='4'>Gagal memuat data (Cek Rules Firebase).</td></tr>";
+            }
+        }
+
+        async function deleteLink(id) {
+            if(confirm("Hapus link ini?")) {
+                await db.collection("links").doc(id).delete();
+                loadLinks();
+            }
+        }
+
+        function copyLink() {
+            const t = document.getElementById('finalLink');
+            t.select();
+            document.execCommand('copy');
+            alert("Tersalin!");
+        }
+
+        // Jalankan saat load
+        checkLoginSession();
+
+    </script>
 </body>
 </html>
